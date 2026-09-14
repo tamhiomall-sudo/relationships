@@ -2,9 +2,9 @@
 
 **A weekly check-in on the people you have decided are worth keeping.**
 
-One HTML file. No install, no account, no server, no subscription. Download it, double-click it, and it works. Nothing you type ever leaves your machine.
+**Open it here:** [adriaanbosch.net/relationships](https://adriaanbosch.net/relationships/relationships.html)
 
-**Try it now:** [adriaanbosch.net/relationships](https://adriaanbosch.net/relationships/relationships.html). It runs in your browser, and what you type stays in your browser.
+No install, no account, no subscription. Click the link and it runs in your browser. adriaanbosch.net hands you the tool; it never sees what you put into it. Everything you type stays in your browser, on your device.
 
 ![The weekly check-in, with the invented example loaded](screenshot.png)
 
@@ -75,10 +75,12 @@ Birthdays appear in the week too. It is the one reason to get in touch that need
 
 ## Getting started
 
-1. Download `relationships.html`.
-2. Double-click it. That is the install.
-3. Press **Show me an example** to see it with data in it, and clear it when you have looked.
-4. Add your first real person.
+1. Open [the tool](https://adriaanbosch.net/relationships/relationships.html). There is nothing to install.
+2. Press **Show me an example** to see it with data in it, and clear it when you have looked.
+3. Add your first real person.
+4. Bookmark the link, and come back to it in the same browser.
+
+**Want to check it never sends your data anywhere?** Once the page has opened, switch off your Wi-Fi and carry on. It still saves and still exports, because nothing in it needs the website to handle what you type.
 
 Adding somebody takes under a minute: name, tier, and one line on what you want. Everything else can wait.
 
@@ -100,6 +102,8 @@ It is written against how LinkedIn lays out a profile today, so it will need a n
 
 **The file you export is the record. The browser is a cache.**
 
+What you add is kept in the browser you used, on the device you used. A work laptop and a home laptop are two separate stores, and a private window forgets everything when you close it. If you clear your browser's data for adriaanbosch.net, the tool's data goes with it.
+
 Press **Save a copy** and you get a JSON file with everything in it. That file is the backup, and the tool nags you when the last one is old. **Open** restores it, and reconciles as it goes: how many records were in the file, how many were read in, what was left out and why, what was kept with a value changed, and the first and last record so you can check the ends.
 
 **CSV** gives you the whole thing as a spreadsheet, so you are never locked in.
@@ -110,33 +114,25 @@ A file that claims to be from a different tool is refused, and nothing is change
 
 There are no network calls of any kind. No analytics, no telemetry, no fonts, no CDN, no sync, no sign-in.
 
-You do not have to take that on faith, which is the part that matters. Open the file in any text editor and search for these three:
+You do not have to take that on faith, which is the part that matters. With the tool open, right-click the page, choose **View Page Source**, and search for these three:
 
 ```
 fetch(          XMLHttpRequest          WebSocket
 ```
 
-Those are the ways a web page asks the internet for something. There are none of them in here, and the file does not name them anywhere either, so a search really does come back empty.
+Those are the ways a web page asks the internet for something. There are none of them in here, and the page does not name them anywhere either, so a search really does come back empty.
 
 Search for `http` as well and you will find exactly one, and it is not a request. It is a pattern that recognises a web address inside text you paste in, so it can put somebody's profile link in the right box.
 
-That is a claim you can settle yourself in under a minute, which is rare in software and is the main reason this is one file rather than an application.
+That is a claim you can settle yourself in under a minute, which is rare in software. Switching off the Wi-Fi, above, is the same check without reading anything.
 
 It follows that your data lives in your browser's storage and in the files you export. Nobody else has a copy, including whoever wrote this. If you clear your browser data without exporting first, it is gone.
-
-## Making it yours
-
-The file is both the product and its own source. There is no build step, no framework, no minification and no dependencies.
-
-So you can open it, hand it to an AI assistant, and say make this fit how I work. Change the tier names, change the windows, add a field, take one out. You do not need to be able to code, and you do not need to ask anybody.
-
-That is deliberate. A tool you cannot change is somebody else's opinion about how you should work.
 
 ---
 
 ## Requirements
 
-A browser. That is the entire list.
+A browser, and a connection to open the page. Once it is open it keeps working without one.
 
 It is built for a desktop or laptop and there is no phone version, on purpose. Capture on the move belongs in a note or a message to yourself; entry happens when you sit down. One copy of the data, nothing to sync, and the small amount of friction is the price of that.
 
@@ -148,4 +144,4 @@ The capacity numbers are Robin Dunbar's.
 
 ## Licence
 
-MIT. Do what you like with it.
+MIT.
