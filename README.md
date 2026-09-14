@@ -4,6 +4,8 @@
 
 One HTML file. No install, no account, no server, no subscription. Download it, double-click it, and it works. Nothing you type ever leaves your machine.
 
+**Try it now:** [adriaanbosch.net/relationships](https://adriaanbosch.net/relationships/relationships.html). It runs in your browser, and what you type stays in your browser.
+
 ![The weekly check-in, with the invented example loaded](screenshot.png)
 
 ---
