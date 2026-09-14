@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Relationships</title>
+<style>
+/* ======================================================================
+   Relationships. Who is worth a word this week.
+
+   Written by Adriaan Bosch, September 2026. MIT licence. The README beside
+   it says what the tool is for, and how to check its privacy claim for
+   yourself rather than take it on trust.
+
+   The one line: this keeps the people who matter within reach. The
+   objective is what drives it. The tier says how much attention somebody is
+   worth, and just as importantly how much is too much, because attention is
+   finite. Time is the input: you do nothing and the list changes anyway.
+
+   It does not talk about people going cold or relationships decaying. That
+   framing makes the tool a ledger of failure, and a ledger of failure gets
+   closed. This one says who is worth a word, which is a thing you can act on
+   this morning.
+
+   No network calls of any kind. Nothing here asks the internet for anything,
+   and nothing is sent anywhere. The README names the exact words to search
+   this file for, if you would rather check that than take it on trust. They
+   are deliberately not spelled out here, because a comment naming them would
+   turn up in the search and spoil it.
+   ====================================================================== */
+:root{
+  --bg:#16191d; --card:#1C1F23; --line:#2f333a; --field:#141619;
+  --text:#f0ece4; --dim:#9a948a; --accent:#C8A15A;
+  --good:#4ecb8d; --warn:#e6c05a; --bad:#e66a5a;
+  --serif:Fraunces,Georgia,'Times New Roman',serif;
+  --sans:'Source Sans 3',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 var(--sans);
+  position:relative;min-height:100%;}
+button{font:inherit;color:inherit;cursor:pointer;}
+a{color:var(--accent);text-decoration:none;}
+[hidden]{display:none!important;}
+
+/* The band behind the top of the page, anchored to the document so it scrolls
+   away like a hero rather than sitting behind the content forever.
+
+   The other tools here use a photograph. This one is drawn in CSS instead,
+   because it is the one that gets published and the photograph's licensing
+   was not certain enough to send out under somebody's name. That turns out to
+   suit the file better anyway: it stays genuinely one file, with nothing
+   beside it to lose and no second request to explain. */
+body::before{content:'';position:absolute;top:0;left:0;right:0;
+  height:56vh;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(115% 80% at 76% 0%, rgba(200,161,90,.11) 0%, rgba(200,161,90,0) 58%),
+    radial-gradient(95% 72% at 10% 4%, rgba(126,146,168,.08) 0%, rgba(126,146,168,0) 62%),
+    linear-gradient(180deg, #1e2228 0%, #1b1f25 38%, #181b20 68%, var(--bg) 100%);}
+body > *{position:relative;z-index:1;}
+
+.wrap{max-width:940px;margin:0 auto;padding:24px;}
+
+/* ---- hero -------------------------------------------------------------
+   The answer before anything is read. The lists below are the detail. */
+.hero{padding:34px 2px 4px;}
+.herotop{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;}
+.eyebrow{color:var(--accent);font-size:11px;text-transform:uppercase;
+  letter-spacing:.14em;font-weight:600;}
+h1{font:400 40px/1.1 var(--serif);letter-spacing:-.02em;margin:8px 0 0;}
+.dateline{color:var(--dim);font-size:13px;margin-top:7px;}
+.standfirst{font:400 21px/1.45 var(--serif);margin:26px 0 0;max-width:36ch;}
+.standfirst b{color:var(--accent);font-weight:400;}
+.aside{color:var(--dim);font-size:13px;margin-top:12px;max-width:58ch;}
+.aside .over{color:var(--warn);}
+/* A finding you can act on beats a finding you can only read. The tool says a
+   tier is over its range or that people are waiting to be placed, so the words
+   themselves are the way through to those people. */
+.aside .jump, .cap[data-jump]{cursor:pointer;border-bottom:1px dotted rgba(200,161,90,.5);}
+.aside .jump:hover, .cap[data-jump]:hover{color:var(--accent);border-bottom-color:var(--accent);}
+.cap[data-jump]{border-bottom:none;}
+.cap[data-jump]:hover{border-color:var(--accent);}
+.herospace{height:62px;}
+
+/* ---- navigation -------------------------------------------------------
+   Two views and the actions. Deliberately short: the review is where this
+   tool is used, and everything else is somewhere to go when that is done. */
+.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:18px;}
+.tab{min-height:38px;background:transparent;border:1px solid transparent;
+  border-radius:9px;padding:7px 13px;font-size:13.5px;color:var(--dim);
+  transition:color .2s ease,border-color .2s ease;}
+.tab:hover{color:var(--text);}
+.tab.on{color:var(--text);border-color:var(--line);background:rgba(255,255,255,.04);}
+.navspace{flex:1;}
+
+.btn{min-height:34px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+  border-radius:8px;padding:6px 12px;font-size:12.5px;white-space:nowrap;
+  transition:border-color .22s ease,color .22s ease;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.primary{min-height:44px;background:var(--accent);border-color:var(--accent);
+  color:#20211c;font-weight:600;padding:9px 17px;font-size:13px;}
+.btn.primary:hover{color:#20211c;}
+.btn.danger{color:var(--bad);border-color:rgba(230,106,90,.4);}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad);}
+
+/* ---- panels -----------------------------------------------------------
+   One level of containment. Contents stay solid so nothing is read against
+   the photograph. */
+.panel{background:rgba(28,31,35,.88);border:1px solid var(--line);
+  border-radius:14px;padding:6px 20px 14px;margin-bottom:14px;}
+.phead{display:flex;align-items:baseline;justify-content:space-between;
+  gap:12px;padding:14px 0 10px;border-bottom:1px solid var(--line);}
+.phead h2{font-size:11px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--accent);margin:0;font-weight:600;}
+.phead .count{color:var(--dim);font-size:12px;}
+
+/* ---- a person row in the review --------------------------------------
+   The signal is the overshoot, not the raw gap. A tier 1 at five months and
+   a tier 3 at fourteen are both two months over, and that is the number
+   that makes four tiers comparable without arithmetic.
+   Every row in that panel is already due, so a two-colour warning scale
+   would only rank degrees of failure. Instead one mark, the house accent,
+   picks out the few who have waited more than twice their tier's window.
+   Nothing is painted red: a person you have not spoken to since March is not
+   an error, and a screen that scolds is a screen you stop opening. */
+.row{display:grid;grid-template-columns:1fr auto;gap:14px 18px;
+  padding:15px 0 15px 15px;border-bottom:1px solid rgba(47,51,58,.6);
+  border-left:2px solid transparent;transition:background .2s ease;}
+.row:last-child{border-bottom:none;}
+.row:hover{background:rgba(255,255,255,.018);}
+/* Named so they cannot collide with anything else here. An earlier cut
+   called these .due and .most, and .due was already the grid for a row in
+   "due this week": every person row but the top one silently took that
+   grid and collapsed to a 96px column. Nothing errored, and it only showed
+   up in a DOM measurement. Scope or spell out a short class name. */
+.row.waiting{border-left-color:rgba(200,161,90,.28);}
+.row.longest{border-left-color:var(--accent);}
+
+.who{min-width:0;}
+.name{display:block;font:400 19px/1.25 var(--serif);}
+.name button{background:none;border:none;padding:0;font:inherit;text-align:left;}
+.name button:hover{color:var(--accent);}
+.org{display:block;color:var(--dim);font-size:12.5px;margin-top:3px;}
+.tier{display:inline-block;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);border:1px solid var(--line);
+  border-radius:5px;padding:1px 6px;margin-left:9px;vertical-align:2px;}
+
+/* The objective sits on the row on purpose. It is the answer to "what do I
+   say to them", which is what makes this a five minute screen rather than a
+   list of names that produces guilt and no telephone calls. */
+.obj{display:block;margin-top:10px;font-size:14px;max-width:62ch;}
+.obj .lab{color:var(--dim);font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.09em;margin-right:7px;}
+.obj.missing{color:var(--warn);}
+.last{display:block;color:var(--dim);font-size:12.5px;margin-top:7px;max-width:62ch;}
+
+.right{text-align:right;white-space:nowrap;}
+.gap{font:400 15px/1.2 var(--serif);}
+.overshoot{display:block;margin-top:4px;font-size:12px;letter-spacing:.02em;}
+.row.longest .overshoot{color:var(--accent);}
+.acts{margin-top:12px;display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap;}
+
+/* ---- due this week ---------------------------------------------------- */
+.due{display:grid;grid-template-columns:96px 1fr auto;gap:16px;
+  align-items:baseline;padding:13px 0;border-bottom:1px solid rgba(47,51,58,.6);}
+.due:last-child{border-bottom:none;}
+.day{font:400 13px/1.3 var(--serif);color:var(--dim);}
+.day.now{color:var(--accent);}
+.day.late{color:var(--bad);}
+.what{min-width:0;}
+.what .act{display:block;font-size:14.5px;}
+.what .for{display:block;color:var(--dim);font-size:12.5px;margin-top:3px;}
+
+/* ---- the finished state -----------------------------------------------
+   A review you can finish is a place. A filter you can only look at is not. */
+.done{text-align:center;padding:38px 20px 42px;}
+.done .tick{font:400 30px/1 var(--serif);color:var(--good);}
+.done h3{font:400 23px/1.3 var(--serif);margin:14px 0 0;}
+.done p{color:var(--dim);font-size:13.5px;margin:9px auto 0;max-width:46ch;}
+
+.closer{border-top:1px solid var(--line);margin-top:22px;padding:18px 2px 42px;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+.closer .note{color:var(--dim);font-size:12.5px;}
+.closer .note.warn{color:var(--warn);}
+
+/* ---- everyone --------------------------------------------------------- */
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 0;}
+.filters input[type=search]{min-height:38px;background:var(--field);
+  border:1px solid var(--line);border-radius:8px;color:var(--text);
+  font:13.5px var(--sans);padding:8px 11px;min-width:220px;flex:1;}
+.filters input:focus,.filters select:focus{outline:none;border-color:var(--accent);}
+.filters select{min-height:38px;background:var(--field);border:1px solid var(--line);
+  border-radius:8px;color:var(--text);font:13.5px var(--sans);padding:8px 11px;}
+
+.plist{display:grid;grid-template-columns:1fr auto auto;gap:12px 16px;}
+#sittingList .plist{grid-template-columns:1fr auto auto auto;
+  align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(47,51,58,.6);}
+.plist:last-child{border-bottom:none;}
+.plist .pn{font:400 16px/1.3 var(--serif);}
+.plist .pn button{background:none;border:none;padding:0;font:inherit;text-align:left;}
+.plist .pn button:hover{color:var(--accent);}
+.plist .po{display:block;color:var(--dim);font-size:12px;margin-top:2px;}
+.plist .pw{font-size:12.5px;color:var(--dim);white-space:nowrap;}
+.plist .pw.longest{color:var(--accent);}
+
+/* Tier capacity. Not a chart, a sentence with a number in it. */
+.caps{display:flex;gap:10px;flex-wrap:wrap;padding:4px 0 14px;}
+.cap{border:1px solid var(--line);border-radius:9px;padding:8px 12px;font-size:12.5px;
+  color:var(--dim);}
+.cap b{color:var(--text);font-weight:600;}
+.cap.over{border-color:rgba(230,192,90,.45);}
+.cap.over b{color:var(--warn);}
+
+/* ---- the grab ---------------------------------------------------------
+   A thing you drag, so it has to look like a thing you drag. */
+.grab{display:flex;gap:18px;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;border:1px dashed var(--line);border-radius:12px;
+  padding:15px 17px;margin:16px 0 6px;}
+.grabtext{min-width:0;flex:1;}
+.grabtitle{display:block;font:400 16px/1.3 var(--serif);}
+.grabnote{display:block;color:var(--dim);font-size:12.5px;margin-top:5px;max-width:62ch;}
+#bmLink{cursor:grab;text-decoration:none;display:inline-block;}
+#bmLink:active{cursor:grabbing;}
+.grabwarn{color:var(--dim);font-size:11.5px;margin-bottom:4px;}
+
+/* ---- the person sheet ------------------------------------------------- */
+.sheet .back{margin:0 0 4px;}
+.sheet h2.pname{font:400 30px/1.15 var(--serif);margin:6px 0 2px;}
+.sheet .pmeta{color:var(--dim);font-size:13px;margin-bottom:4px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
+@media (max-width:720px){ .grid2{grid-template-columns:1fr;} }
+
+.f{margin-bottom:13px;}
+.f label{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;
+  letter-spacing:.09em;margin-bottom:5px;}
+.f label .req{color:var(--warn);text-transform:none;letter-spacing:0;font-size:11px;}
+.f input,.f select,.f textarea{width:100%;min-height:44px;background:var(--field);
+  border:1px solid var(--line);border-radius:8px;color:var(--text);
+  font:13.5px var(--sans);padding:9px 11px;}
+.f textarea{min-height:70px;resize:vertical;}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--accent);}
+.f .hint{display:block;color:var(--dim);font-size:11.5px;margin-top:5px;}
+.f.flag input,.f.flag textarea{border-color:rgba(230,192,90,.5);}
+
+.hist{padding:12px 0;border-bottom:1px solid rgba(47,51,58,.6);}
+.hist:last-child{border-bottom:none;}
+.hist .hd{color:var(--dim);font-size:11.5px;}
+.hist .ht{display:block;font-size:14px;margin-top:3px;}
+.hist .hk{display:inline-block;font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--dim);border:1px solid var(--line);
+  border-radius:5px;padding:1px 6px;margin-left:8px;}
+
+/* ---- the empty first screen -------------------------------------------
+   Every other tool here opened for somebody who already knew why. This one
+   meets strangers, so the empty state does the explaining. */
+.empty{text-align:center;padding:34px 20px 40px;max-width:56ch;margin:0 auto;}
+.empty h3{font:400 25px/1.3 var(--serif);margin:0 0 12px;}
+.empty p{color:var(--dim);font-size:14px;margin:0 0 10px;}
+.empty .row2{display:flex;gap:9px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+
+/* ---- modal ------------------------------------------------------------ */
+.modalbg{position:fixed;inset:0;background:rgba(10,12,14,.72);z-index:40;
+  display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;
+  overflow:auto;}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:15px;
+  padding:20px 22px 22px;max-width:600px;width:100%;}
+.modal h3{font:400 22px/1.25 var(--serif);margin:0 0 4px;}
+.modal .msub{color:var(--dim);font-size:12.5px;margin:0 0 16px;}
+.modalacts{display:flex;gap:9px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap;}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  background:var(--card);border:1px solid var(--line);border-radius:11px;
+  padding:11px 18px;font-size:13.5px;max-width:74ch;opacity:0;
+  pointer-events:none;transition:opacity .25s ease;z-index:50;}
+.toast.on{opacity:1;}
+.toast.good{border-color:rgba(78,203,141,.5);}
+.toast.bad{border-color:rgba(230,106,90,.5);}
+
+@media (max-width:720px){
+  .wrap{padding:16px;} h1{font-size:31px;} .standfirst{font-size:19px;}
+  .row{grid-template-columns:1fr;} .right{text-align:left;}
+  .acts{justify-content:flex-start;}
+  .due{grid-template-columns:1fr;gap:5px;}
+  .plist{grid-template-columns:1fr;}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important;} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="herotop">
+      <div>
+        <div class="eyebrow">Relationships</div>
+        <h1 id="h1">Weekly check-in</h1>
+        <div class="dateline" id="dateline"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;">
+        <button class="btn primary" id="bAdd">Add someone</button>
+        <button class="btn" id="bExport">Save a copy</button>
+        <button class="btn" id="bOpen">Open</button>
+        <button class="btn" id="bCsv">CSV</button>
+      </div>
+    </div>
+    <div class="standfirst" id="standfirst"></div>
+    <div class="aside" id="aside"></div>
+    <div class="nav">
+      <button class="tab on" id="tabReview" data-view="review">Review</button>
+      <button class="tab" id="tabAll" data-view="all">Everyone</button>
+      <button class="tab" id="tabAdd" data-view="add">Add people</button>
+    </div>
+  </div>
+
+  <div class="herospace"></div>
+
+  <!-- ============ REVIEW ============ -->
+  <div id="viewReview">
+    <div class="panel" id="coldPanel">
+      <div class="phead"><h2>Worth a word</h2><span class="count" id="coldCount"></span></div>
+      <div id="coldList"></div>
+    </div>
+    <div class="panel" id="duePanel">
+      <div class="phead"><h2>Due this week</h2><span class="count" id="dueCount"></span></div>
+      <div id="dueList"></div>
+    </div>
+  </div>
+
+  <!-- ============ EVERYONE ============ -->
+  <div id="viewAll" hidden>
+    <div class="panel">
+      <div class="phead"><h2>How much attention each tier holds</h2><span class="count">a range you can actually keep, not a target</span></div>
+      <div class="caps" id="caps"></div>
+    </div>
+    <div class="panel">
+      <div class="phead"><h2>Everyone</h2><span class="count" id="allCount"></span></div>
+      <div class="filters">
+        <input type="search" id="q" placeholder="Search name, organisation, objective or tag" aria-label="Search people">
+        <select id="fTier" aria-label="Filter by tier">
+          <option value="">All tiers</option>
+          <option value="1">Tier 1, inner circle</option>
+          <option value="2">Tier 2, active</option>
+          <option value="3">Tier 3, strategic</option>
+          <option value="4">Tier 4, casual</option>
+        </select>
+        <select id="fState" aria-label="Filter by state">
+          <option value="">Everyone</option>
+          <option value="cold">Worth a word</option>
+          <option value="noobj">No objective</option>
+          <option value="unplaced">Not placed yet</option>
+          <option value="arch">Archived</option>
+        </select>
+      </div>
+      <div id="allList"></div>
+    </div>
+  </div>
+
+  <!-- ============ ADD PEOPLE ============
+       A sitting, not a dialogue. Populating this tool means 50 to 150
+       judgements, and a modal that closes after each one turns an evening's
+       work into an evening of clicking. The form stays put, clears itself,
+       and puts the cursor back in the name box. Still one person at a time,
+       still a decision each time, still nothing imported. -->
+  <div id="viewAdd" hidden>
+    <div class="panel">
+      <div class="phead"><h2>Add people</h2><span class="count">one at a time, on purpose</span></div>
+
+      <div class="grab">
+        <div class="grabtext">
+          <span class="grabtitle">Drag this to your bookmarks bar</span>
+          <span class="grabnote">Then on someone's profile, click it. Their name, headline, location
+            and link go to your clipboard, ready to paste below. It reads only the page you already
+            have open, and sends nothing anywhere.</span>
+        </div>
+        <a id="bmLink" class="btn primary" draggable="true">Add to Relationships</a>
+      </div>
+      <div class="grabwarn" id="grabWarn"></div>
+
+      <div class="f" style="margin-top:14px;">
+        <label for="pasteBox">Paste a profile</label>
+        <textarea id="pasteBox" placeholder="Paste a name and headline copied from LinkedIn, or anywhere else. Two or three lines is plenty."></textarea>
+        <span class="hint">Fills the boxes below so you are correcting rather than typing. Nothing is fetched and no page is read: this is only what you pasted.</span>
+        <span class="hint" id="pasteExtras" style="color:var(--accent);"></span>
+      </div>
+
+      <div class="grid2">
+        <div class="f"><label for="qName">Name</label>
+          <input id="qName" placeholder="Their name"></div>
+        <div class="f"><label for="qTier">Tier</label><select id="qTier"></select>
+          <span class="hint">Each tier has a range, because attention runs out. Tier 4 is
+            the waiting room: use it when you have not decided yet, and it will remind you.</span></div>
+      </div>
+      <div class="f"><label for="qLinked">Their profile</label>
+        <input id="qLinked" placeholder="Paste a link, or let the bookmarklet fill it">
+        <span class="hint" id="dupWarn"></span></div>
+      <div class="f"><label for="qObj">Objective</label>
+        <input id="qObj" placeholder="One line on what you want from this relationship">
+        <span class="hint">The field that drives everything else. Required for Tier 1 and 2.</span></div>
+      <div class="grid2">
+        <div class="f"><label for="qOrg">Organisation</label><input id="qOrg" placeholder="Optional"></div>
+        <div class="f"><label for="qRole">Role</label><input id="qRole" placeholder="Optional"></div>
+      </div>
+      <div class="grid2">
+        <div class="f"><label for="qLast">When you last spoke</label><input id="qLast" type="date"></div>
+        <div class="f"><label for="qBday">Birthday</label><input id="qBday" type="date">
+          <span class="hint">Only the day and month are used, so guess the year.</span></div>
+      </div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;">
+        <button class="btn primary" id="qAdd">Add and next</button>
+        <button class="btn" id="qClear">Clear</button>
+        <span class="hint" style="margin:0;">Enter adds and moves on.</span>
+      </div>
+    </div>
+
+    <div class="panel" id="sittingPanel" hidden>
+      <div class="phead"><h2>Added just now</h2><span class="count" id="sittingCount"></span></div>
+      <div id="sittingList"></div>
+    </div>
+  </div>
+
+  <!-- ============ ONE PERSON ============ -->
+  <div id="viewPerson" hidden>
+    <div class="panel sheet" id="sheet"></div>
+  </div>
+
+  <div class="closer">
+    <span class="note" id="closerNote"></span>
+    <span style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="bDemo">Show me an example</button>
+      <button class="btn danger" id="bWipe" hidden>Clear the example</button>
+    </span>
+  </div>
+
+</div>
+
+<input type="file" id="file" accept="application/json" hidden>
+<div id="modalHost"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =======================================================================
+   Relationships. Checkpoint 1.
+
+   What it does: holds people you decided to keep, watches the gap since
+   you last spoke to each one, and tells you on a Monday who has slipped
+   past their tier's window.
+
+   What it refuses to do: research anybody, enrich a record, read your mail
+   or calendar, send anything, score a person, or import a contact list.
+   Import restores this tool's own backup and nothing else. Every judgement
+   about who matters, which tier, and what the objective is stays with you.
+
+   Not in checkpoint 1, and deliberately: CSV import (export works, and the
+   import needs the full reconciliation the house rules ask for), a next
+   actions view of its own, and any record of what came of an ask.
+   ======================================================================= */
+
+const KEY  = 'relationships-v1';
+const KIND = 'relationships';
+
+/* The cold rule, in months, by tier. Tier 4 has no threshold on purpose, so
+   it never reaches the review. That is the unsettled question about whether
+   tier 4 should exist at all, parked in the least destructive position:
+   it holds people without ever nagging about them. */
+const THRESHOLD = { 1:3, 2:6, 3:12 };
+
+/* The tiers are an attention budget. Each range says how many people you can
+   realistically keep at that closeness, so it caps as much as it aims at. The
+   numbers come from Dunbar, and his name is nowhere in the interface on
+   purpose: it means nothing to most people using this, and a tool that has to
+   name-drop a researcher to justify a number has not explained the number.
+   Being over the range is shown as a fact, never blocked as an error. */
+const TIER = {
+  1:{ name:'Inner circle', min:5,  max:10  },
+  2:{ name:'Active',       min:25, max:50  },
+  3:{ name:'Strategic',    min:50, max:150 },
+  4:{ name:'Not placed',   min:0,  max:0   }
+};
+
+/* Tier 4 is the one tier with no ceiling, and an uncapped tier inside a tool
+   built on capacity is a hole big enough to put a phone book through. So it
+   is not "everyone else", it is "not decided yet": a waiting room for somebody
+   just met, held while the decision is made.
+
+   What keeps it a queue rather than a bucket is the same input as everything
+   else here, time. Somebody who has sat unplaced for over a month has in
+   practice been decided about, and the tool says so rather than letting the
+   pile grow quietly. */
+const PLACE_WITHIN = 1;
+function isUnplaced(p){ return !p.archived && p.tier === 4; }
+function waitingMonths(p){ return monthsSince(p.created); }
+function waitedTooLong(p){
+  const m = waitingMonths(p);
+  return isUnplaced(p) && m != null && m >= PLACE_WITHIN;
+}
+
+/* What counts as contact: anything addressed to them individually. Broadcast
+   is not offered here, which is how the rule is enforced rather than merely
+   stated. A post they liked is contact with an audience. */
+const TYPES = ['WhatsApp','Call','Email','Message','In person','Letter'];
+
+let S = blank();
+function blank(){ return { people:[], lastExport:null, view:'review', openId:null }; }
+
+const $   = id => document.getElementById(id);
+const uid = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---- dates ------------------------------------------------------------
+   Calendar months, not days divided by thirty. Somebody last contacted on
+   the 3rd of March is not "two months" on the 2nd of May. */
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') +
+         '-' + String(d.getDate()).padStart(2,'0');
+}
+function parseDate(iso){
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const d = new Date(iso + 'T00:00:00');
+  return isNaN(d.getTime()) ? null : d;
+}
+function monthsSince(iso){
+  const then = parseDate(iso);
+  if (!then) return null;
+  const now = new Date();
+  let m = (now.getFullYear() - then.getFullYear()) * 12 + (now.getMonth() - then.getMonth());
+  if (now.getDate() < then.getDate()) m--;
+  return Math.max(0, m);
+}
+function daysUntil(iso){
+  const d = parseDate(iso);
+  if (!d) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+function niceDate(iso){
+  const d = parseDate(iso);
+  if (!d) return '';
+  const months = ['January','February','March','April','May','June','July',
+                  'August','September','October','November','December'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+function plural(n, word){ return n + ' ' + word + (n === 1 ? '' : 's'); }
+function people(n){ return n === 1 ? '1 person' : n + ' people'; }
+
+/* ---- the state of one person ------------------------------------------ */
+function lastContact(p){
+  if (!p.contacts || !p.contacts.length) return null;
+  return p.contacts.slice().sort((a,b) => (a.date < b.date ? 1 : -1))[0];
+}
+function gapMonths(p){
+  const lc = lastContact(p);
+  return monthsSince(lc ? lc.date : p.created);
+}
+function overshoot(p){
+  const t = THRESHOLD[p.tier];
+  const g = gapMonths(p);
+  if (!t || g == null) return null;
+  return g - t;
+}
+function isDue(p){
+  if (p.archived) return false;
+  const o = overshoot(p);
+  return o != null && o > 0;
+}
+/* One mark, not a scale. 'most' is more than twice the tier's window, which
+   is the handful genuinely worth doing first. Everything else in the panel is
+   simply due, and due is not a failure. */
+function severity(p){
+  const t = THRESHOLD[p.tier];
+  const g = gapMonths(p);
+  if (!t || g == null) return '';
+  if (g >= t * 2) return 'longest';
+  if (g >  t)     return 'waiting';
+  return '';
+}
+
+/* ---- birthdays --------------------------------------------------------
+   Stored as a full date because that is what a date input gives, but only
+   the day and month are ever used, so a guessed year does no harm. A
+   birthday is the one prompt that needs no excuse attached to it. */
+function nextBirthday(p){
+  const b = parseDate(p.bday);
+  if (!b) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  let d = new Date(now.getFullYear(), b.getMonth(), b.getDate());
+  if (d < now) d = new Date(now.getFullYear() + 1, b.getMonth(), b.getDate());
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') +
+         '-' + String(d.getDate()).padStart(2,'0');
+}
+function needsObjective(p){ return (p.tier === 1 || p.tier === 2) && !String(p.objective||'').trim(); }
+
+/* ---- persistence ------------------------------------------------------
+   localStorage is per origin, so work saved through the launcher and work
+   saved by double-clicking this same file go to two different stores, and
+   nothing warns about it. The exported file is the record. The browser is
+   a cache. That matters more here than in a calculator, because these are
+   real people and losing them quietly would be worse than losing a sum. */
+function save(){
+  try {
+    /* The windows are stamped into the saved state on every write, so anything
+       that reads this store can apply the same rule without keeping a second
+       copy of the numbers. The dashboard does exactly that. A rule that lives
+       in two files is a rule that will disagree with itself eventually, and
+       the disagreement would be invisible: both sides would look right. */
+    S.rules = { threshold: THRESHOLD, tiers: TIER, placeWithin: PLACE_WITHIN };
+    localStorage.setItem(KEY, JSON.stringify(S));
+  }
+  catch(e){ toast('Could not save. The browser store may be full or blocked. Save a copy now.', 'bad'); }
+}
+function load(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) S = Object.assign(blank(), JSON.parse(raw));
+    if (!Array.isArray(S.people)) S.people = [];
+  } catch(e){ S = blank(); }
+}
+
+let toastT = null;
+function toast(text, tone){
+  const t = $('toast');
+  t.textContent = text;
+  t.className = 'toast on ' + (tone || '');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { t.className = 'toast ' + (tone || ''); }, 4600);
+}
+
+/* =======================================================================
+   RENDER
+   ======================================================================= */
+function render(){
+  const live = S.people.filter(p => !p.archived);
+  $('viewReview').hidden = S.view !== 'review';
+  $('viewAll').hidden    = S.view !== 'all';
+  $('viewAdd').hidden    = S.view !== 'add';
+  $('viewPerson').hidden = S.view !== 'person';
+  $('tabReview').classList.toggle('on', S.view === 'review');
+  $('tabAll').classList.toggle('on', S.view === 'all');
+  $('tabAdd').classList.toggle('on', S.view === 'add');
+  $('bDemo').hidden = S.people.length > 0;
+  $('bWipe').hidden = !S.people.some(p => p.demo);
+
+  renderHero(live);
+  if (S.view === 'review') renderReview(live);
+  if (S.view === 'all')    renderAll();
+  if (S.view === 'add')    renderSitting();
+  if (S.view === 'person') renderPerson();
+  renderCloser(live);
+}
+
+function renderHero(live){
+  const d = new Date();
+  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July',
+                  'August','September','October','November','December'];
+  $('dateline').textContent = days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+
+  const cold = live.filter(isDue);
+  const due  = dueThisWeek(live);
+
+  let s;
+  if (!S.people.length){
+    s = 'Nobody is in here yet.';
+  } else if (!cold.length && !due.length){
+    s = 'Everyone is within reach, and nothing is on this week.';
+  } else if (!cold.length){
+    s = 'Everyone is within reach. <b>' + plural(due.length,'thing') + '</b> on this week.';
+  } else {
+    s = '<b>' + people(cold.length) + '</b> worth a word' +
+        (due.length ? ', and <b>' + plural(due.length,'thing') + '</b> on this week' : '') + '.';
+  }
+  $('standfirst').innerHTML = s;
+
+  /* The capacity finding is a sentence, not a panel. The brief says this
+     screen shows what is cold, what is due, and nothing else. But a tier
+     that is over its ceiling is the failure the cold list cannot catch:
+     everything green because the standards quietly slipped. */
+  const bits = [];
+  [1,2,3].forEach(t => {
+    const n = live.filter(p => p.tier === t).length;
+    if (n > TIER[t].max){
+      bits.push('Tier ' + t + ' is holding <span class="over">' + people(n) +
+        ', against a range of ' + TIER[t].min + ' to ' + TIER[t].max + '</span>. ' +
+        (t === 1 ? 'An inner circle only works while it is small enough to keep.'
+                 : 'Attention spread this thin is attention nobody feels.'));
+    }
+  });
+  const noObj = live.filter(needsObjective).length;
+  if (noObj) bits.push('<span class="jump" data-jump="noobj">' + people(noObj) +
+    ' in Tier 1 or 2</span> ' + (noObj === 1 ? 'has' : 'have') +
+    ' no objective yet, which is the line that tells you what to say.');
+
+  /* The waiting room, surfaced. Not in a panel of its own, because the review
+     shows what is due and nothing else, but a growing unplaced pile is the
+     same kind of finding as a tier over its range. */
+  const stale = live.filter(waitedTooLong).length;
+  if (stale) bits.push('<span class="jump" data-jump="unplaced">' + people(stale) +
+    '</span> ' + (stale === 1 ? 'has' : 'have') +
+    ' been waiting over a month to be placed in a tier.');
+  $('aside').innerHTML = bits.join(' ');
+}
+
+/* Two kinds of thing land here: something he decided to do, and a birthday,
+   which is the one reason to get in touch that needs no reason attached. */
+function dueThisWeek(live){
+  const out = [];
+  live.forEach(p => {
+    const n = p.nextDate ? daysUntil(p.nextDate) : null;
+    if (n !== null && n <= 7) out.push({ p, kind:'action', date:p.nextDate, what:p.nextWhat || 'Next action' });
+    const b = nextBirthday(p);
+    if (b){ const bd = daysUntil(b); if (bd !== null && bd >= 0 && bd <= 7)
+      out.push({ p, kind:'birthday', date:b, what:'Birthday' }); }
+  });
+  return out.sort((a,b) => (a.date < b.date ? -1 : 1));
+}
+
+function renderReview(live){
+  /* ---- cold ---- */
+  const cold = live.filter(isDue).sort((a,b) => overshoot(b) - overshoot(a));
+  $('coldCount').textContent = cold.length ? 'longest waiting first' : '';
+  if (!S.people.length){
+    $('coldList').innerHTML = emptyFirstScreen();
+  } else if (!cold.length){
+    $('coldList').innerHTML =
+      '<div class="done"><div class="tick">&#10003;</div><h3>Everyone is within reach</h3>' +
+      '<p>Every tier is inside the window you set for it. This is the state worth holding, and it is the whole point of the exercise.</p></div>';
+  } else {
+    $('coldList').innerHTML = cold.map(coldRow).join('');
+  }
+
+  /* ---- due ---- */
+  const due = dueThisWeek(live);
+  $('dueCount').textContent = due.length ? plural(due.length,'thing') + ' to do' : '';
+  if (!due.length){
+    $('dueList').innerHTML = S.people.length
+      ? '<div class="done"><div class="tick">&#10003;</div><h3>Nothing on this week</h3>' +
+        '<p>Close it and go and do the work.</p></div>'
+      : '<div class="done"><p>Next actions appear here once there are people to have them.</p></div>';
+  } else {
+    $('dueList').innerHTML = due.map(dueRow).join('');
+  }
+}
+
+/* When they fell due, rather than how far past it he is. Same information,
+   and it reads as a date in the diary instead of a mark against him. */
+function dueSince(p){
+  const lc = lastContact(p);
+  const from = parseDate(lc ? lc.date : p.created);
+  if (!from) return '';
+  const d = new Date(from.getFullYear(), from.getMonth() + THRESHOLD[p.tier], from.getDate());
+  const months = ['January','February','March','April','May','June','July',
+                  'August','September','October','November','December'];
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return months[d.getMonth()] + (sameYear ? '' : ' ' + d.getFullYear());
+}
+
+function coldRow(p){
+  const sev = severity(p);
+  const ov  = overshoot(p);
+  const g   = gapMonths(p);
+  const lc  = lastContact(p);
+  const objHtml = String(p.objective||'').trim()
+    ? '<span class="obj"><span class="lab">Objective</span>' + esc(p.objective) + '</span>'
+    : (needsObjective(p)
+        ? '<span class="obj missing"><span class="lab">Objective</span>Not written down, and this is a Tier ' + p.tier + ' record.</span>'
+        : '');
+  const lastHtml = lc
+    ? '<span class="last">' + esc(niceDate(lc.date)) + '. ' + esc(lc.type) +
+      (lc.note ? '. ' + esc(lc.note) : '') + '</span>'
+    : '<span class="last">Nothing logged yet, so this counts from the day you added them.</span>';
+  return '<div class="row ' + sev + '">' +
+    '<div class="who">' +
+      '<span class="name"><button data-open="' + p.id + '">' + esc(p.name) + '</button>' +
+        '<span class="tier">Tier ' + p.tier + '</span></span>' +
+      (p.org ? '<span class="org">' + esc(p.org) + '</span>' : '') +
+      objHtml + lastHtml +
+    '</div>' +
+    '<div class="right">' +
+      '<span class="gap">' + (g === 0 ? 'spoke this month' : plural(g,'month')) + '</span>' +
+      '<span class="overshoot">due since ' + esc(dueSince(p)) + '</span>' +
+      '<span class="acts">' +
+        '<button class="btn" data-log="' + p.id + '">Log contact</button>' +
+        (trackerPresent() ? '<button class="btn" data-totodo="' + p.id + '">To do</button>' : '') +
+        '<button class="btn" data-snooze="' + p.id + '">Not now</button>' +
+      '</span>' +
+    '</div>' +
+  '</div>';
+}
+
+function dueRow(it){
+  const p = it.p;
+  const n = daysUntil(it.date);
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let label, cls = '';
+  if (n < 0)       { label = plural(-n,'day') + ' ago'; cls = 'late'; }
+  else if (n === 0){ label = 'Today';  cls = 'now'; }
+  else if (n === 1){ label = 'Tomorrow'; }
+  else             { label = days[parseDate(it.date).getDay()]; }
+  const act = it.kind === 'birthday'
+    ? 'Birthday. A reason to get in touch that needs no reason.'
+    : esc(it.what);
+  return '<div class="due">' +
+    '<span class="day ' + cls + '">' + esc(label) + '</span>' +
+    '<span class="what"><span class="act">' + act + '</span>' +
+      '<span class="for">' + esc(p.name) + (p.org ? ', ' + esc(p.org) : '') + '</span></span>' +
+    (it.kind === 'birthday'
+      ? '<button class="btn" data-log="' + p.id + '">Log a word</button>'
+      : '<button class="btn" data-donenext="' + p.id + '">Done</button>') +
+  '</div>';
+}
+
+function emptyFirstScreen(){
+  /* This is what a stranger sees. It has to say what the tool is and what to
+     do first, in the space where the data will later sit. */
+  return '<div class="empty">' +
+    '<h3>Nobody is in here yet</h3>' +
+    '<p>This is not an address book and it is not a sales pipeline. It holds the people you have ' +
+    'decided are worth keeping, and every Monday it tells you which of them is worth a word.</p>' +
+    '<p>You add people one at a time, on purpose. Nothing is imported, nothing is researched, ' +
+    'and nothing leaves this machine.</p>' +
+    '<p>Each person gets an objective and a tier. The objective is one line on what you want from ' +
+    'the relationship, and it is what drives everything else. The tier says how much attention that ' +
+    'is worth, and just as usefully how much is too much, because you only have so much to give. ' +
+    'If you have not decided yet, Tier 4 holds them until you do.</p>' +
+    '<div class="row2">' +
+      '<button class="btn primary" data-add="1">Add the first person</button>' +
+      '<button class="btn" data-demo="1">Show me an example first</button>' +
+    '</div></div>';
+}
+
+/* ---- everyone --------------------------------------------------------- */
+function renderAll(){
+  const live = S.people.filter(p => !p.archived);
+  $('caps').innerHTML = [1,2,3,4].map(t => {
+    const n = live.filter(p => p.tier === t).length;
+    const over = TIER[t].max && n > TIER[t].max;
+    if (t === 4){
+      const stale = live.filter(waitedTooLong).length;
+      return '<span class="cap' + (stale ? ' over' : '') + '" data-jump="unplaced">Tier 4, ' +
+        esc(TIER[4].name) + ' <b>' + n + '</b> waiting' +
+        (stale ? ', ' + stale + ' for over a month' : '') + '</span>';
+    }
+    return '<span class="cap' + (over ? ' over' : '') + '" data-jump="tier' + t + '">Tier ' + t + ', ' +
+      esc(TIER[t].name) + ' <b>' + n + '</b> of ' + TIER[t].min + ' to ' + TIER[t].max + '</span>';
+  }).join('');
+
+  const q     = $('q').value.trim().toLowerCase();
+  const tier  = $('fTier').value;
+  const state = $('fState').value;
+
+  let list = state === 'arch' ? S.people.filter(p => p.archived) : live;
+  if (tier)  list = list.filter(p => String(p.tier) === tier);
+  if (state === 'cold')  list = list.filter(isDue);
+  if (state === 'noobj') list = list.filter(needsObjective);
+  if (state === 'unplaced'){
+    list = list.filter(isUnplaced)
+               .sort((a,b) => (waitingMonths(b)||0) - (waitingMonths(a)||0));
+  }
+  if (q) list = list.filter(p =>
+    [p.name, p.org, p.role, p.objective, p.theirs, p.ask, (p.tags||[]).join(' ')]
+      .join(' ').toLowerCase().includes(q));
+
+  list = list.slice().sort((a,b) => {
+    const ao = overshoot(a), bo = overshoot(b);
+    if (ao == null && bo == null) return a.name.localeCompare(b.name);
+    if (ao == null) return 1;
+    if (bo == null) return -1;
+    return bo - ao;
+  });
+
+  $('allCount').textContent = people(list.length);
+  if (!list.length){
+    $('allList').innerHTML = '<div class="done"><p>Nothing matches that.</p></div>';
+    return;
+  }
+  $('allList').innerHTML = list.map(p => {
+    const g = gapMonths(p), ov = overshoot(p), sev = severity(p);
+    let gapText;
+    if (isUnplaced(p)){
+      const w = waitingMonths(p);
+      gapText = 'waiting ' + (w ? plural(w,'month') : 'since this month') + ' to be placed';
+    } else {
+      gapText = g == null ? '-' :
+        (g === 0 ? 'this month' : plural(g,'month')) +
+        (ov != null && ov > 0 ? ', due since ' + dueSince(p) : '');
+    }
+    return '<div class="plist">' +
+      '<span class="pn"><button data-open="' + p.id + '">' + esc(p.name) + '</button>' +
+        (needsObjective(p) ? '<span class="tier" style="color:var(--warn);border-color:rgba(230,192,90,.45);">No objective</span>' : '') +
+        (p.org ? '<span class="po">' + esc(p.org) + '</span>' : '') + '</span>' +
+      '<span class="pw">Tier ' + p.tier + '</span>' +
+      '<span class="pw ' + sev + '">' + esc(gapText) + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+/* ---- one person ------------------------------------------------------- */
+function renderPerson(){
+  const p = S.people.find(x => x.id === S.openId);
+  if (!p){ S.view = 'review'; render(); return; }
+  const lc = lastContact(p);
+  const g  = gapMonths(p), ov = overshoot(p);
+  const hist = (p.contacts||[]).slice().sort((a,b) => (a.date < b.date ? 1 : -1));
+  const notes = (p.notes||[]).slice().sort((a,b) => (a.date < b.date ? 1 : -1));
+
+  $('sheet').innerHTML =
+    '<div class="back"><button class="btn" data-view="' + esc(S.lastList || 'review') + '">Back</button></div>' +
+    '<h2 class="pname">' + esc(p.name) + '</h2>' +
+    '<div class="pmeta">' + esc([p.role, p.org, p.location].filter(Boolean).join(' · ') || 'No organisation recorded') + '</div>' +
+    '<div class="pmeta">Tier ' + p.tier + ', ' + esc(TIER[p.tier].name) + '. ' +
+      (g == null ? 'No contact recorded.' :
+        'Last contact ' + (g === 0 ? 'this month' : plural(g,'month') + ' ago') +
+        (ov != null && ov > 0 ? ', which is ' + plural(ov,'month') + ' past the Tier ' + p.tier + ' window' : '') + '.') +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 20px;">' +
+      '<button class="btn primary" data-log="' + p.id + '">Log contact</button>' +
+      '<button class="btn" data-note="' + p.id + '">Add a note</button>' +
+      (trackerPresent() ? '<button class="btn" data-totodo="' + p.id + '">Add to to-do</button>' : '') +
+      '<button class="btn" data-edit="' + p.id + '">Edit</button>' +
+      '<button class="btn" data-archive="' + p.id + '">' + (p.archived ? 'Bring back' : 'Let go') + '</button>' +
+      '<button class="btn danger" data-delete="' + p.id + '">Delete</button>' +
+    '</div>' +
+
+    '<div class="phead"><h2>What this is for</h2></div>' +
+    '<div style="padding:14px 0 4px;">' +
+      field('Objective', p.objective,
+        needsObjective(p) ? 'Required for Tier ' + p.tier + ', and not written down.' : '', 'warn') +
+      field('What they are trying to solve', p.theirs,
+        'Their words where you have them. Ask, do not assume.') +
+      (p.tier <= 2 ? field('The ask', p.ask,
+        'The specific thing you would ask, when the time is right.') : '') +
+      field('How you met', p.met, '') +
+      field('Next action', p.nextWhat ? p.nextWhat + (p.nextDate ? '  (' + niceDate(p.nextDate) + ')' : '') : '', '') +
+      field('Birthday', birthdayLine(p), '') +
+      field('Tags', (p.tags||[]).join(', '), '') +
+      field('Mutual connections', p.mutuals, '') +
+      field('Contact details', [p.email, p.phone, p.linkedin].filter(Boolean).join(' · '), '') +
+    '</div>' +
+
+    '<div class="phead"><h2>Contact history</h2><span class="count">' +
+      (hist.length ? plural(hist.length,'entry').replace('entrys','entries') : 'nothing logged') + '</span></div>' +
+    (hist.length ? hist.map(c =>
+      '<div class="hist"><span class="hd">' + esc(niceDate(c.date)) +
+      '<span class="hk">' + esc(c.type) + '</span></span>' +
+      (c.note ? '<span class="ht">' + esc(c.note) + '</span>' : '') + '</div>').join('')
+      : '<div class="hist"><span class="hd">Nothing logged yet.</span></div>') +
+
+    '<div class="phead"><h2>Notes</h2><span class="count">appended, never overwritten</span></div>' +
+    (notes.length ? notes.map(n =>
+      '<div class="hist"><span class="hd">' + esc(niceDate(n.date)) + '</span>' +
+      '<span class="ht">' + esc(n.text) + '</span></div>').join('')
+      : '<div class="hist"><span class="hd">No notes yet.</span></div>');
+}
+/* A hint is guidance, and only the missing objective is a finding. Painting
+   both amber makes an empty optional field look like a problem, which is the
+   opposite of "a blank is a finding": if everything is flagged, nothing is. */
+/* The day and month, plus how far off it is while that is still useful.
+   Repeating the same date twice ("15 September, next on 15 September") is
+   the sort of thing that reads as filler. */
+function birthdayLine(p){
+  if (!p.bday) return '';
+  const day = niceDate(p.bday).replace(/ \d{4}$/,'');
+  const n = daysUntil(nextBirthday(p));
+  if (n === 0)  return day + ', today';
+  if (n === 1)  return day + ', tomorrow';
+  if (n <= 30)  return day + ', in ' + plural(n,'day');
+  return day;
+}
+
+function field(label, value, hint, tone){
+  const v = String(value||'').trim();
+  const showHint = hint && !v;
+  return '<div class="f"><label>' + esc(label) + '</label>' +
+    '<div style="font-size:14px;' + (v ? '' : 'color:var(--dim);') + '">' +
+    (v ? esc(v) : 'Not recorded') + '</div>' +
+    (showHint ? '<span class="hint"' + (tone === 'warn' ? ' style="color:var(--warn);"' : '') +
+      '>' + esc(hint) + '</span>' : '') + '</div>';
+}
+
+function renderCloser(live){
+  const left = live.filter(isDue).length + dueThisWeek(live).length;
+  const n = $('closerNote');
+  if (!S.people.length){ n.textContent = 'Nothing saved yet.'; n.className = 'note'; return; }
+  const days = S.lastExport ? -daysUntil(S.lastExport) : null;
+  let backup;
+  if (days == null)      backup = 'No copy has ever been saved. The browser store is not a backup.';
+  else if (days === 0)   backup = 'Copy saved today.';
+  else if (days > 30)    backup = 'Last copy saved ' + plural(days,'day') + ' ago. Save one.';
+  else                   backup = 'Last copy saved ' + plural(days,'day') + ' ago.';
+  n.className = 'note' + ((days == null || days > 30) ? ' warn' : '');
+  n.textContent = (left ? left + ' left in the review. ' : 'Nothing left this morning. ') + backup;
+}
+
+/* =======================================================================
+   ADD AND EDIT
+   ======================================================================= */
+function openPersonForm(id){
+  const p = id ? S.people.find(x => x.id === id) : null;
+  const isNew = !p;
+  const tierOpts = tierOptions(p ? p.tier : 2);
+
+  modal(
+    (isNew ? 'Add someone' : 'Edit ' + esc(p.name)),
+    (isNew ? 'Name, tier, how you met and the objective. Everything else can wait.'
+           : 'Nothing here is researched or filled in for you.'),
+    '<div class="grid2">' +
+      '<div class="f"><label for="mName">Name</label>' +
+        '<input id="mName" value="' + esc(p ? p.name : '') + '" placeholder="Their name"></div>' +
+      '<div class="f"><label for="mTier">Tier</label><select id="mTier">' + tierOpts + '</select></div>' +
+    '</div>' +
+    '<div class="f"><label for="mObj">Objective <span class="req">required for Tier 1 and 2</span></label>' +
+      '<input id="mObj" value="' + esc(p ? p.objective : '') + '" placeholder="One line on what you want from this relationship">' +
+      '<span class="hint">A record without one is a business card in a box.</span></div>' +
+    '<div class="f"><label for="mMet">How you met</label>' +
+      '<input id="mMet" value="' + esc(p ? p.met : '') + '" placeholder="One sentence"></div>' +
+    (isNew
+      ? '<div class="f"><label for="mLast">When did you last speak</label>' +
+        '<input id="mLast" type="date" value="' + todayStr() + '">' +
+        '<span class="hint">Defaults to today. Change it if it has been a while.</span></div>'
+      : '') +
+    '<div class="grid2">' +
+      '<div class="f"><label for="mOrg">Organisation</label>' +
+        '<input id="mOrg" value="' + esc(p ? p.org : '') + '" placeholder="Optional"></div>' +
+      '<div class="f"><label for="mRole">Role</label>' +
+        '<input id="mRole" value="' + esc(p ? p.role : '') + '" placeholder="Optional"></div>' +
+    '</div>' +
+    '<div class="f"><label for="mTheirs">What they are trying to solve</label>' +
+      '<input id="mTheirs" value="' + esc(p ? p.theirs : '') + '" placeholder="Their words where you have them">' +
+      '<span class="hint">Ask, do not assume. This is the line that turns a pitch into a conversation.</span></div>' +
+    '<div class="f"><label for="mAsk">The ask</label>' +
+      '<input id="mAsk" value="' + esc(p ? p.ask : '') + '" placeholder="The specific thing you would ask, when the time is right"></div>' +
+    '<div class="grid2">' +
+      '<div class="f"><label for="mNextWhat">Next action</label>' +
+        '<input id="mNextWhat" value="' + esc(p ? p.nextWhat : '') + '" placeholder="Optional"></div>' +
+      '<div class="f"><label for="mNextDate">By when</label>' +
+        '<input id="mNextDate" type="date" value="' + esc(p ? p.nextDate : '') + '"></div>' +
+    '</div>' +
+    '<div class="f"><label for="mBday">Birthday</label>' +
+      '<input id="mBday" type="date" value="' + esc(p ? (p.bday||'') : '') + '">' +
+      '<span class="hint">Only the day and month are used, so guess the year.</span></div>' +
+    '<div class="grid2">' +
+      '<div class="f"><label for="mTags">Tags</label>' +
+        '<input id="mTags" value="' + esc(p ? (p.tags||[]).join(', ') : '') + '" placeholder="military, Africa, book"></div>' +
+      '<div class="f"><label for="mLoc">Location</label>' +
+        '<input id="mLoc" value="' + esc(p ? p.location : '') + '" placeholder="Optional"></div>' +
+    '</div>' +
+    '<div class="grid2">' +
+      '<div class="f"><label for="mEmail">Email</label>' +
+        '<input id="mEmail" value="' + esc(p ? p.email : '') + '"></div>' +
+      '<div class="f"><label for="mPhone">Phone</label>' +
+        '<input id="mPhone" value="' + esc(p ? p.phone : '') + '"></div>' +
+    '</div>' +
+    '<div class="f"><label for="mLinked">LinkedIn</label>' +
+      '<input id="mLinked" value="' + esc(p ? p.linkedin : '') + '"></div>' +
+    '<div class="f"><label for="mMut">Mutual connections</label>' +
+      '<input id="mMut" value="' + esc(p ? p.mutuals : '') + '" placeholder="Who else knows them"></div>',
+    [{ label: isNew ? 'Add' : 'Save', primary:true, run: () => savePerson(id) }]
+  );
+  setTimeout(() => { const el = $('mName'); if (el) el.focus(); }, 30);
+}
+
+function savePerson(id){
+  const name = $('mName').value.trim();
+  if (!name){ toast('A name is the one thing it cannot do without.', 'bad'); return false; }
+  const tier = Number($('mTier').value);
+  const obj  = $('mObj').value.trim();
+
+  /* The objective is load-bearing for tier 1 and 2 and the tool says so.
+     It warns rather than blocks: refusing to save would lose the record
+     somebody is halfway through typing, which is worse. The blank then
+     shows up in the review as a finding until it is filled. */
+  if ((tier === 1 || tier === 2) && !obj){
+    toast('Saved without an objective. It will show as missing in the review until you write one.', 'bad');
+  }
+
+  const data = {
+    name: name,
+    tier: tier,
+    objective: obj,
+    met:      $('mMet').value.trim(),
+    org:      $('mOrg').value.trim(),
+    role:     $('mRole').value.trim(),
+    theirs:   $('mTheirs').value.trim(),
+    ask:      $('mAsk').value.trim(),
+    nextWhat: $('mNextWhat').value.trim(),
+    nextDate: $('mNextDate').value,
+    bday:     $('mBday') ? $('mBday').value : '',
+    tags:     $('mTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    location: $('mLoc').value.trim(),
+    email:    $('mEmail').value.trim(),
+    phone:    $('mPhone').value.trim(),
+    linkedin: $('mLinked').value.trim(),
+    mutuals:  $('mMut').value.trim()
+  };
+
+  if (id){
+    Object.assign(S.people.find(x => x.id === id), data);
+  } else {
+    const p = Object.assign({
+      id: uid(), created: todayStr(), archived:false, demo:false, contacts:[], notes:[]
+    }, data);
+    const when = $('mLast') ? $('mLast').value : '';
+    if (when) p.contacts.push({ date: when, type:'Message', note:'' });
+    S.people.push(p);
+  }
+  save(); render();
+  if (!id) toast(name + ' added.', 'good');
+  return true;
+}
+
+/* ---- log a contact ----------------------------------------------------
+   Two taps and a sentence, which is the brief. Broadcast is not in the list
+   of types: a post they liked is contact with an audience, not with a
+   person, and it does not reset the clock. */
+function openLog(id){
+  const p = S.people.find(x => x.id === id);
+  if (!p) return;
+  modal('Log contact', esc(p.name) + '. Anything addressed to them individually counts.',
+    '<div class="grid2">' +
+      '<div class="f"><label for="lType">How</label><select id="lType">' +
+        TYPES.map(t => '<option' + (t === 'WhatsApp' ? ' selected' : '') + '>' + t + '</option>').join('') +
+      '</select></div>' +
+      '<div class="f"><label for="lDate">When</label>' +
+        '<input id="lDate" type="date" value="' + todayStr() + '"></div>' +
+    '</div>' +
+    '<div class="f"><label for="lNote">What it was</label>' +
+      '<input id="lNote" placeholder="One line. What was said, or what you promised.">' +
+      '<span class="hint">Optional, and the one you will want in four months.</span></div>' +
+    '<div class="grid2">' +
+      '<div class="f"><label for="lNextWhat">Anything to do next</label>' +
+        '<input id="lNextWhat" value="' + esc(p.nextWhat||'') + '" placeholder="Optional"></div>' +
+      '<div class="f"><label for="lNextDate">By when</label>' +
+        '<input id="lNextDate" type="date" value="' + esc(p.nextDate||'') + '"></div>' +
+    '</div>',
+    [{ label:'Log it', primary:true, run: () => {
+      const date = $('lDate').value || todayStr();
+      p.contacts = p.contacts || [];
+      p.contacts.push({ date: date, type: $('lType').value, note: $('lNote').value.trim() });
+      p.nextWhat = $('lNextWhat').value.trim();
+      p.nextDate = $('lNextDate').value;
+      save(); render();
+      toast('Logged for ' + p.name + '.', 'good');
+      return true;
+    }}]);
+  setTimeout(() => { const el = $('lNote'); if (el) el.focus(); }, 30);
+}
+
+function openNote(id){
+  const p = S.people.find(x => x.id === id);
+  if (!p) return;
+  modal('Add a note', esc(p.name) + '. Notes are appended with a date, never overwritten.',
+    '<div class="f"><label for="nText">The note</label>' +
+      '<textarea id="nText" placeholder="What you want to remember"></textarea></div>',
+    [{ label:'Add', primary:true, run: () => {
+      const t = $('nText').value.trim();
+      if (!t) return false;
+      p.notes = p.notes || [];
+      p.notes.push({ date: todayStr(), text: t });
+      save(); render(); toast('Note added.', 'good');
+      return true;
+    }}]);
+  setTimeout(() => { const el = $('nText'); if (el) el.focus(); }, 30);
+}
+
+/* =======================================================================
+   THE JOINT: handing a person to the Work Tracker
+
+   Deciding somebody is worth a word is not the same as doing it, and the
+   doing belongs on the to-do list rather than here. So a person can be sent
+   across as a task.
+
+   It goes through an inbox rather than straight into the tracker's own store.
+   Both tools keep their work in the same browser, so writing directly would
+   look like it worked and then vanish: a tracker open in another tab holds
+   its state in memory and overwrites the store on its next save. The inbox is
+   a separate key that only this tool writes and only the tracker drains.
+
+   What is written is already in the tracker's own shape, so the
+   receiving side adds rows rather than translating them. The person's id
+   travels with it so the same person cannot be added twice.
+
+   The button only appears when the tracker is actually there. On a copy of
+   this tool with no Work Tracker beside it there is nothing to hand to, and
+   an offer that goes nowhere is worse than no offer. */
+const TRACKER_KEY = 'worktracker_v1';
+const HANDOFF_KEY = 'worktracker-inbox-v1';
+
+function trackerPresent(){
+  try { return localStorage.getItem(TRACKER_KEY) != null; } catch(e){ return false; }
+}
+
+function sendToTracker(id){
+  const p = S.people.find(x => x.id === id);
+  if (!p) return;
+  let box = { kind:'work-tracker-inbox', items:[] };
+  try {
+    const raw = localStorage.getItem(HANDOFF_KEY);
+    if (raw){ const j = JSON.parse(raw); if (j && Array.isArray(j.items)) box = j; }
+  } catch(e){}
+
+  if (box.items.some(it => it.sourceId === p.id)){
+    toast(p.name + ' is already waiting in the to-do list.');
+    return;
+  }
+
+  const lc = lastContact(p);
+  const why = [];
+  if (String(p.objective||'').trim()) why.push('Objective: ' + p.objective);
+  if (lc) why.push('Last spoke ' + niceDate(lc.date) + ', ' + lc.type +
+    (lc.note ? '. ' + lc.note : ''));
+  if (String(p.ask||'').trim()) why.push('The ask: ' + p.ask);
+
+  /* The tracker's own fields, written here so it does not have to translate. */
+  box.items.push({
+    type:'task',
+    title:'Get in touch with ' + p.name,
+    client: p.org || '',
+    code:'', standards:'', due:'', priority:'med',
+    start:'', end:'', estimate:'',
+    notes: why.join('\n'),
+    override:true, column:'donext',
+    source:'relationships', sourceId: p.id
+  });
+
+  try { localStorage.setItem(HANDOFF_KEY, JSON.stringify(box)); }
+  catch(e){ toast('Could not pass that across. The browser store may be full.', 'bad'); return; }
+  toast(p.name + ' sent to the to-do list. It appears next time the Work Tracker is opened.', 'good');
+}
+
+/* =======================================================================
+   THE SITTING: fast entry
+   ======================================================================= */
+let sitting = [];   /* ids added in this visit, so the run is visible */
+
+function tierOptions(sel){
+  return [1,2,3,4].map(t => '<option value="' + t + '"' + (t === sel ? ' selected' : '') +
+    '>Tier ' + t + ', ' + TIER[t].name +
+    (TIER[t].max ? ' (' + TIER[t].min + ' to ' + TIER[t].max + ')' : ' (decide later)') +
+    '</option>').join('');
+}
+
+/* ---- the grab ---------------------------------------------------------
+   A bookmarklet. Drag it to the bookmarks bar once, then click it on
+   somebody's profile, and their name, headline, location and link land on
+   the clipboard, ready to paste into the box above.
+
+   What it does NOT do matters as much. It reads only the page he already has
+   open, about a person he chose to look at, because he clicked. It fetches
+   nothing, contacts nothing, and sends nothing anywhere: the text goes to his
+   clipboard and no further. That is a keystroke saver, not research, and the
+   difference is that a person is driving every step of it.
+
+   It is written as an ordinary function and turned into a bookmarklet with
+   toString() below, so it stays readable in this file rather than becoming a
+   wall of escaped string. That only works because nothing here is minified.
+
+   It will break when LinkedIn rearranges its markup. That is accepted: the
+   paste box above keeps working on its own, so a broken grab costs a copy and
+   paste rather than the feature. Every selector below is a fallback for the
+   one before it, starting with the most stable. */
+function grabProfile(){
+  var clean = function(t){ return String(t || '').replace(/\s+/g,' ').trim(); };
+  var meta  = function(prop){
+    var e = document.querySelector('meta[property="' + prop + '"]') ||
+            document.querySelector('meta[name="' + prop + '"]');
+    return e ? clean(e.getAttribute('content')) : '';
+  };
+  var NOISE = /(connection|follower|contact info|^message$|^connect$|^follow(ing)?$|^more$|^\d+(st|nd|rd|th)$|^pending$|^open to work$)/i;
+
+  /* The name. An h1 is the most durable idea on a profile page; the page
+     title and the open-graph tag are the fallbacks. */
+  var h1 = document.querySelector('h1');
+  var name = h1 ? clean(h1.textContent) : '';
+  var og = meta('og:title');
+  if (!name && og)  name = clean(og.split(' | ')[0].split(' - ')[0]);
+  if (!name)        name = clean(String(document.title || '')
+                        .replace(/^\(\d+\)\s*/,'').split(' | ')[0].split(' - ')[0]);
+
+  /* The headline and the location: the first two plain lines of text near the
+     name that are not the name and not page furniture. */
+  var head = '', loc = '';
+  if (h1){
+    var scope = h1.closest('section') || h1.parentElement.parentElement || h1.parentElement;
+    var bits  = scope ? scope.querySelectorAll('div,span,p,h2') : [];
+    for (var i = 0; i < bits.length && !(head && loc); i++){
+      if (bits[i].children.length) continue;
+      var t = clean(bits[i].textContent);
+      if (!t || t === name || t.length > 180 || NOISE.test(t)) continue;
+      if (!head){ head = t; continue; }
+      if (!loc && t !== head) loc = t;
+    }
+  }
+  if (!head && og){
+    /* The open-graph title is laid out "Name - Headline - Company", so with
+       three parts the last one is the employer and is worth handing over in
+       the form the paste box understands. */
+    var rest = og.split(' | ')[0].split(' - ').map(clean).filter(Boolean);
+    if (rest.length >= 3)      head = rest.slice(1, -1).join(' - ') + ' at ' + rest[rest.length-1];
+    else if (rest.length === 2) head = rest[1];
+  }
+  if (!head) head = meta('og:description').split('.')[0];
+
+  /* Two things worth having that are nowhere near the headline, so they get
+     their own pass before the noise filter above throws them away.
+
+     The connection degree says whether this is somebody he is actually
+     connected to or somebody he has only found, which is a different
+     relationship and belongs on the record.
+
+     Mutual connections fill a field that has existed since the first sketch
+     and has never once been filled in, because nobody types that by hand. It
+     is also the most useful thing on the page: who else already knows them is
+     how an introduction gets asked for. */
+  var degree = '', mutual = '';
+  var all = document.querySelectorAll('span,div,a,li');
+  for (var k = 0; k < all.length && !(degree && mutual); k++){
+    if (all[k].children.length) continue;
+    var txt = clean(all[k].textContent);
+    if (!txt || txt.length > 200) continue;
+    if (!degree && /^(1st|2nd|3rd)\+?$/i.test(txt)) degree = txt.toLowerCase();
+    if (!mutual && /mutual connection/i.test(txt) && txt.length > 20) mutual = txt;
+  }
+  if (mutual){
+    mutual = mutual.replace(/\s*other mutual connections?.*/i, ' others')
+                   .replace(/\s*(are|is)\s+mutual connections?.*/i, '')
+                   .trim();
+  }
+
+  var url = String(location.href).split('?')[0].split('#')[0];
+  var when = new Date().toLocaleDateString('en-GB',
+    { day:'numeric', month:'long', year:'numeric' });
+
+  /* The first lines stay free text so a hand copy still works. Anything the
+     page gave up beyond that is labelled, because guessing a fifth field by
+     its position is how a parser starts putting a location in the notes. */
+  var lines = [name, head, loc, url].filter(Boolean);
+  if (degree) lines.push('Connection: ' + degree + ' degree');
+  if (mutual) lines.push('Mutual: ' + mutual);
+  lines.push('Source: LinkedIn, ' + when);
+  var out = lines.join('\n');
+
+  /* Tell him it worked, on his own screen. If the browser refuses clipboard
+     access, hand him the text selected so one keystroke still does it. */
+  var show = function(copied){
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;z-index:2147483647;right:16px;bottom:16px;' +
+      'max-width:360px;background:#1C1F23;color:#f0ece4;border:1px solid #C8A15A;' +
+      'border-radius:12px;padding:14px 16px;font:13px/1.5 -apple-system,Segoe UI,' +
+      'Roboto,Helvetica,Arial,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+    var head2 = document.createElement('div');
+    head2.style.cssText = 'color:#C8A15A;font-weight:600;margin-bottom:4px';
+    head2.textContent = copied ? 'Copied for Relationships' : 'Ready to copy';
+    var line = document.createElement('div');
+    line.textContent = copied
+      ? (name || 'That page') + '. Paste it into Add people.'
+      : 'Press the copy key now, then paste it into Add people.';
+    box.appendChild(head2); box.appendChild(line);
+    if (!copied){
+      var ta = document.createElement('textarea');
+      ta.value = out;
+      ta.style.cssText = 'width:100%;height:86px;margin-top:9px;background:#141619;' +
+        'color:#f0ece4;border:1px solid #2f333a;border-radius:7px;padding:7px;' +
+        'font:12px ui-monospace,Menlo,Consolas,monospace';
+      box.appendChild(ta);
+      setTimeout(function(){ ta.focus(); ta.select(); }, 60);
+    }
+    document.body.appendChild(box);
+    setTimeout(function(){ if (box.parentNode) box.parentNode.removeChild(box); },
+      copied ? 3200 : 25000);
+  };
+
+  if (!name){ show(false); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(out).then(function(){ show(true); },
+                                           function(){ show(false); });
+  } else { show(false); }
+}
+
+/* Reads what was pasted rather than what is on a page somewhere. LinkedIn's
+   copied text carries a lot of chrome, so the noise is stripped and the first
+   two useful lines are taken as the name and the headline. It fills boxes for
+   correcting; nothing is committed until Add is pressed. */
+const PASTE_NOISE = /^(connect|message|follow|following|more|pending|\d+(st|nd|rd|th)\b.*|·.*|\d[\d,+]* (connections?|followers?)|contact info|mutual connections?.*|talks about.*|open to work|he\/him|she\/her|they\/them)$/i;
+function parsePaste(text){
+  let lines = String(text||'').split(/\r?\n/)
+    .map(l => l.replace(/\u00b7/g,'·').trim())
+    .filter(l => l && !PASTE_NOISE.test(l) && l.length < 400);
+  if (!lines.length) return null;
+  const out = { name:'', role:'', org:'', linkedin:'', location:'',
+                met:'', mutuals:'', tags:[] };
+
+  /* Only these keys are treated as labels. A headline can easily contain a
+     colon ("Security Consultant: Risk and Resilience"), so anything not on
+     this list stays ordinary text and is read by position. */
+  const KEYS = { connection:'connection', mutual:'mutuals', source:'source',
+                 location:'location', linkedin:'linkedin', company:'org', role:'role' };
+  const labelled = {};
+  lines = lines.filter(l => {
+    const m = l.match(/^([A-Za-z]+)\s*:\s*(.+)$/);
+    if (m && KEYS[m[1].toLowerCase()]){ labelled[KEYS[m[1].toLowerCase()]] = m[2].trim(); return false; }
+    return true;
+  });
+
+  /* A link on its own line is the profile address, wherever it sits. */
+  const link = lines.find(l => /^(https?:\/\/|www\.)\S+$/i.test(l));
+  if (link){ out.linkedin = link; lines = lines.filter(l => l !== link); }
+
+  out.name = lines[0].replace(/\s*·.*$/,'').trim();
+  const headline = lines[1] || '';
+  if (headline){
+    const at = headline.split(/\s+(?:at|@)\s+/i);
+    if (at.length >= 2){ out.role = at[0].trim(); out.org = at.slice(1).join(' at ').trim(); }
+    else out.role = headline.trim();
+  }
+  /* A third line with a comma in it is almost always a place. */
+  if (lines[2] && /,/.test(lines[2]) && lines[2].length < 80) out.location = lines[2].trim();
+
+  /* Labels win over guesses from position. */
+  if (labelled.linkedin) out.linkedin = labelled.linkedin;
+  if (labelled.location) out.location = labelled.location;
+  if (labelled.org)      out.org      = labelled.org;
+  if (labelled.role)     out.role     = labelled.role;
+  if (labelled.mutuals)  out.mutuals  = labelled.mutuals;
+
+  /* How they were found, in the record, because "where did this person come
+     from" is the first thing you want in eight months and the last thing
+     anybody types. A first degree connection and somebody merely found are
+     not the same relationship, so the degree goes in the same sentence. */
+  const source = labelled.source || '';
+  if (source){
+    out.met = source + (labelled.connection ? ', ' + labelled.connection + ' connection' : '');
+    if (/linkedin/i.test(source)) out.tags = ['linkedin'];
+  }
+  return out;
+}
+
+/* What the paste carried that the sitting has no box for. Held here and
+   written onto the record when Add is pressed, rather than adding two more
+   fields that would slow down the thing the sitting exists to speed up. */
+let pendingExtras = { location:'', met:'', mutuals:'', tags:[] };
+
+function applyPaste(){
+  const parsed = parsePaste($('pasteBox').value);
+  if (!parsed || !parsed.name){ toast('Could not find a name in that.', 'bad'); return; }
+  const put = (id, v) => { if (v) $(id).value = v; };
+  put('qName', parsed.name); put('qRole', parsed.role); put('qOrg', parsed.org);
+  put('qLinked', parsed.linkedin);
+  pendingExtras = { location: parsed.location || '',
+                    met: parsed.met || '', mutuals: parsed.mutuals || '',
+                    tags: parsed.tags || [] };
+  /* Say what was kept rather than storing it quietly. Anything held on a
+     person should be visible at the moment it is held. */
+  const extras = [];
+  if (parsed.location) extras.push(parsed.location);
+  if (parsed.met)      extras.push(parsed.met);
+  if (parsed.mutuals)  extras.push('mutuals: ' + parsed.mutuals);
+  if ((parsed.tags||[]).length) extras.push('tagged ' + parsed.tags.join(', '));
+  $('pasteExtras').textContent = extras.length ? 'Also kept: ' + extras.join(' · ') + '.' : '';
+  $('pasteBox').value = '';
+  $('qObj').focus();
+  toast('Read the name and headline. Check them, then write the objective.', 'good');
+}
+
+/* Catching a duplicate before it exists beats deleting one afterwards. It
+   warns and never blocks: two people really can share a name, and a tool that
+   refused would be wrong more often than it was right. Matching is on the
+   name loosely, and on the profile link exactly, because the link is the only
+   thing here that is genuinely unique. */
+function findDuplicate(name, link){
+  const n = String(name||'').trim().toLowerCase();
+  const l = String(link||'').trim().toLowerCase().replace(/\/+$/,'');
+  return S.people.find(p =>
+    (l && String(p.linkedin||'').trim().toLowerCase().replace(/\/+$/,'') === l) ||
+    (n && String(p.name||'').trim().toLowerCase() === n));
+}
+function checkDuplicate(){
+  const hit = findDuplicate($('qName').value, $('qLinked').value);
+  $('dupWarn').textContent = hit
+    ? 'Already in here: ' + hit.name + (hit.org ? ', ' + hit.org : '') +
+      '. Adding again makes a second record.'
+    : '';
+  $('dupWarn').style.color = hit ? 'var(--warn)' : '';
+}
+
+function quickAdd(){
+  const name = $('qName').value.trim();
+  if (!name){ toast('A name is the one thing it cannot do without.', 'bad'); $('qName').focus(); return; }
+  const tier = Number($('qTier').value);
+  const obj  = $('qObj').value.trim();
+  const dup  = findDuplicate(name, $('qLinked').value);
+  if (dup && !confirm(dup.name + ' is already in here' + (dup.org ? ', at ' + dup.org : '') +
+      '.\n\nAdd a second record anyway?')) return;
+  const p = {
+    id: uid(), created: todayStr(), archived:false, demo:false, contacts:[], notes:[],
+    name: name, tier: tier, objective: obj,
+    org: $('qOrg').value.trim(), role: $('qRole').value.trim(),
+    bday: $('qBday').value,
+    location: pendingExtras.location, email:'', phone:'', linkedin: $('qLinked').value.trim(),
+    theirs:'', ask:'', met: pendingExtras.met, mutuals: pendingExtras.mutuals,
+    nextWhat:'', nextDate:'', tags: pendingExtras.tags.slice()
+  };
+  const when = $('qLast').value;
+  if (when) p.contacts.push({ date: when, type:'Message', note:'' });
+  S.people.push(p);
+  sitting.unshift(p.id);
+  save();
+
+  /* Clear and go again. The tier and the last-spoke date stay, because a
+     sitting usually works through one tier at a time. */
+  pendingExtras = { location:'', met:'', mutuals:'', tags:[] };
+  $('pasteExtras').textContent = '';
+  $('dupWarn').textContent = '';
+  ['qName','qObj','qOrg','qRole','qBday','qLinked','pasteBox'].forEach(id => { $(id).value = ''; });
+  render();
+  $('qName').focus();
+  if ((tier === 1 || tier === 2) && !obj){
+    toast(name + ' added with no objective. It will show as missing until you write one.', 'bad');
+  }
+}
+
+function renderSitting(){
+  sitting = sitting.filter(id => S.people.some(x => x.id === id));
+  const rows = sitting.map(id => S.people.find(x => x.id === id)).filter(Boolean);
+  $('sittingPanel').hidden = !rows.length;
+  $('sittingCount').textContent = rows.length ? people(rows.length) : '';
+  if (!rows.length) return;
+  $('sittingList').innerHTML = rows.map(p =>
+    '<div class="plist">' +
+      '<span class="pn"><button data-open="' + p.id + '">' + esc(p.name) + '</button>' +
+        (needsObjective(p) ? '<span class="tier" style="color:var(--warn);border-color:rgba(230,192,90,.45);">No objective</span>' : '') +
+        (p.org ? '<span class="po">' + esc(p.org) + '</span>' : '') + '</span>' +
+      '<span class="pw">Tier ' + p.tier + '</span>' +
+      '<span class="pw">' + (p.bday ? 'birthday ' + esc(niceDate(nextBirthday(p)).replace(/ \d{4}$/,'')) : '') + '</span>' +
+      '<button class="btn danger" data-delete="' + p.id + '" ' +
+        'aria-label="Delete ' + esc(p.name) + '">Delete</button>' +
+    '</div>').join('');
+}
+
+/* =======================================================================
+   FILES
+   The exported file is the record. The browser store is a cache.
+   ======================================================================= */
+function exportJSON(){
+  const payload = Object.assign({ kind: KIND, saved: todayStr() }, S);
+  delete payload.view; delete payload.openId;
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'relationships-' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  S.lastExport = todayStr();
+  save(); render();
+  toast('Saved. That file is the record, not the browser.', 'good');
+}
+
+function csvCell(v){
+  const s = String(v == null ? '' : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function exportCSV(){
+  if (!S.people.length){ toast('Nothing to export yet.', 'bad'); return; }
+  const cols = ['Name','Organisation','Role','Tier','Objective','Their problem','The ask',
+                'How we met','Last contact','Last contact type','Months since','Worth a word','Birthday',
+                'Next action','Next action date','Tags','Mutual connections',
+                'Email','Phone','LinkedIn','Location','Archived'];
+  const rows = S.people.map(p => {
+    const lc = lastContact(p), g = gapMonths(p);
+    return [p.name, p.org, p.role, p.tier, p.objective, p.theirs, p.ask, p.met,
+            lc ? lc.date : '', lc ? lc.type : '', g == null ? '' : g,
+            isDue(p) ? 'yes' : 'no', p.bday || '',
+            p.nextWhat, p.nextDate, (p.tags||[]).join('; '), p.mutuals,
+            p.email, p.phone, p.linkedin, p.location, p.archived ? 'yes' : 'no'];
+  });
+  const csv = [cols, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'relationships-' + todayStr() + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(people(S.people.length) + ' written to CSV. This is the escape hatch, not the backup.', 'good');
+}
+
+/* ---- reading a file in -------------------------------------------------
+   Reconciles before it commits and says so out loud: what was in the file,
+   what was read, what was passed over and why, and the first and last
+   record so the boundaries can be eyeballed. A file that says it is
+   something else is refused and nothing is changed.
+
+   Note this restores this tool's own backup. It is not a contact importer,
+   and there is deliberately no way to load a list of people from anywhere
+   else. That is the difference between a backup and a phone book. */
+function importJSON(evt){
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    /* A refusal is an alert and not a toast, which is what the rest of the
+       estate does. A toast can be missed, and somebody who thinks a restore
+       worked when it was refused is in a worse place than somebody made to
+       click OK. Success stays a toast. */
+    let data;
+    try { data = JSON.parse(reader.result); }
+    catch(e){ alert('That is not a file this tool wrote. Nothing has been changed.');
+              evt.target.value = ''; return; }
+
+    /* A file saved before kinds existed carries none, and must never be
+       turned away for the kind, or a year of saved work stops opening. */
+    if (data && data.kind && data.kind !== KIND){
+      alert('That file says it is "' + data.kind + '". This tool reads "' + KIND +
+            '" files. Nothing has been changed.');
+      evt.target.value = ''; return;
+    }
+    if (!data || !Array.isArray(data.people)){
+      alert('No list of people in that file. Nothing has been changed.');
+      evt.target.value = ''; return;
+    }
+
+    /* Three outcomes, three words. A record left out, a record kept with a
+       value changed, and a record taken as it stands are not the same thing,
+       and calling them all "skipped" sends you looking for a row that is
+       sitting in the output. Positions are the position in the file. */
+    const inCount = data.people.length;
+    const kept = [], left = [], altered = [];
+    data.people.forEach((raw, i) => {
+      const line = i + 1;
+      if (!raw || typeof raw !== 'object'){ left.push(line + ': not a record'); return; }
+      const name = String(raw.name || '').trim();
+      if (!name){ left.push(line + ': no name, which is the column that identifies a row'); return; }
+      const tier = Number(raw.tier);
+      kept.push({
+        id: raw.id || uid(),
+        name: name,
+        tier: (tier >= 1 && tier <= 4) ? tier : 4,
+        org: raw.org||'', role: raw.role||'', location: raw.location||'',
+        email: raw.email||'', phone: raw.phone||'', linkedin: raw.linkedin||'',
+        objective: raw.objective||'', theirs: raw.theirs||'', ask: raw.ask||'',
+        met: raw.met||'', mutuals: raw.mutuals||'',
+        nextWhat: raw.nextWhat||'', nextDate: raw.nextDate||'', bday: raw.bday||'',
+        tags: Array.isArray(raw.tags) ? raw.tags : [],
+        contacts: Array.isArray(raw.contacts) ? raw.contacts : [],
+        notes: Array.isArray(raw.notes) ? raw.notes : [],
+        archived: !!raw.archived,
+        created: raw.created || todayStr(),
+        demo: !!raw.demo
+      });
+      if (!Number.isInteger(tier) || tier < 1 || tier > 4){
+        altered.push(line + ' (' + name + '): tier was "' + raw.tier + '", kept as Tier 4');
+      }
+    });
+
+    if (!kept.length){
+      alert(inCount + ' records in the file, none readable. Nothing has been changed.');
+      evt.target.value = ''; return;
+    }
+    const block = (label, arr) => arr.length
+      ? label + ': ' + arr.length + '\n  ' + arr.slice(0,8).join('\n  ') +
+        (arr.length > 8 ? '\n  and ' + (arr.length - 8) + ' more' : '') + '\n'
+      : '';
+    if (!confirm(
+      'In the file: ' + inCount + ' records.\n' +
+      'Read in: ' + kept.length + '.\n' +
+      block('Left out entirely', left) +
+      block('Kept, with a value changed', altered) +
+      (!left.length && !altered.length ? 'Nothing left out, nothing changed.\n' : '') +
+      'First read in: ' + kept[0].name + '\n' +
+      'Last read in: ' + kept[kept.length-1].name + '\n\n' +
+      'This replaces everyone currently in the tool. Continue?'
+    )){ evt.target.value = ''; return; }
+
+    S.people = kept;
+    S.lastExport = data.saved || S.lastExport;
+    S.view = 'review';
+    save(); render();
+    toast(inCount + ' in the file, ' + kept.length + ' read in' +
+      (left.length ? ', ' + left.length + ' left out' : '') +
+      (altered.length ? ', ' + altered.length + ' changed' : '') + '.', 'good');
+    evt.target.value = '';
+  };
+  reader.onerror = () => { alert('Could not read that file. Nothing has been changed.'); evt.target.value = ''; };
+  reader.readAsText(file);
+}
+
+/* ---- the example ------------------------------------------------------
+   Generated here in code, marked as demo, and cleared in one click. This is
+   not a contact import: no file is read and no real person is involved. It
+   exists because a stranger opening an empty tool learns nothing from it. */
+function demo(){
+  const back = m => {
+    const d = new Date(); d.setMonth(d.getMonth() - m);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') +
+           '-' + String(d.getDate()).padStart(2,'0');
+  };
+  const fwd = days => {
+    const d = new Date(); d.setDate(d.getDate() + days);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') +
+           '-' + String(d.getDate()).padStart(2,'0');
+  };
+  const bdayIn = days => {
+    const d = new Date(); d.setDate(d.getDate() + days); d.setFullYear(1974);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') +
+           '-' + String(d.getDate()).padStart(2,'0');
+  };
+  const mk = (name, org, tier, months, objective, theirs, note, type, next, nextIn, bday) => ({
+    id: uid(), demo:true, created: back(months), archived:false,
+    name, org, role:'', location:'', email:'', phone:'', linkedin:'',
+    tier, objective, theirs, ask:'', met:'', mutuals:'',
+    nextWhat: next || '', nextDate: nextIn == null ? '' : fwd(nextIn),
+    bday: bday || '',
+    tags:[], notes:[],
+    contacts:[{ date: back(months), type: type, note: note }]
+  });
+  S.people = [
+    mk('Marguerite Oyelaran','Estates director, teaching hospital group',1,8,
+       'The one person who can put me in front of a healthcare client board.','',
+       'Long call about the new wing. She asked me to send the barrier note and I never did.','Call',
+       'Send the barrier note', 0),
+    mk('Tom Hedley','Fire engineer, multidisciplinary practice',1,5,
+       '','',
+       'Drinks after the stadium review. He offered to co-write something.','In person',
+       'Reply about co-writing', 4),
+    mk('Dr Priya Raghunathan','Head of resilience, national infrastructure operator',2,11,
+       'Understands where the regulator is actually going. Worth one honest conversation a year.',
+       'Getting her board to fund resilience work that has no incident behind it.',
+       'She sent the consultation draft and asked what I thought.','Email','', null),
+    mk('Callum Brodie','Security manager, mixed-use development',2,7,
+       'Came to me for advice when he took the role. Keep the door open.','',
+       'Asking about the lighting spec.','WhatsApp','', null, bdayIn(3)),
+    mk('Anneke Venter','Independent consultant, Johannesburg',3,14,
+       'The Africa position needs people who have actually done the work there.','',
+       'Coffee at the conference.','In person','', null, bdayIn(6)),
+    mk('Yolanda Hamblen','Podcast host',2,2,
+       'Already warm, and the easiest ask in the whole plan.','',
+       'She offered a third appearance whenever there is something to talk about.','Message',
+       'Ask who else she would introduce me to', 2)
+  ];
+  S.lastExport = null;
+  save(); render();
+  toast('Six invented people. Nothing here is real. Clear it when you have seen enough.', 'good');
+}
+
+/* =======================================================================
+   MODAL
+   ======================================================================= */
+function modal(title, sub, body, actions){
+  const host = $('modalHost');
+  host.innerHTML =
+    '<div class="modalbg" id="modalbg"><div class="modal" role="dialog" aria-modal="true">' +
+      '<h3>' + title + '</h3><p class="msub">' + sub + '</p>' + body +
+      '<div class="modalacts">' +
+        '<button class="btn" id="mCancel">Cancel</button>' +
+        actions.map((a,i) => '<button class="btn' + (a.primary ? ' primary' : '') +
+          '" data-act="' + i + '">' + esc(a.label) + '</button>').join('') +
+      '</div>' +
+    '</div></div>';
+  const close = () => { host.innerHTML = ''; };
+  $('mCancel').addEventListener('click', close);
+  $('modalbg').addEventListener('click', e => { if (e.target.id === 'modalbg') close(); });
+  host.querySelectorAll('[data-act]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (actions[Number(b.getAttribute('data-act'))].run() !== false) close();
+    });
+  });
+  document.addEventListener('keydown', function onEsc(e){
+    if (e.key === 'Escape'){ close(); document.removeEventListener('keydown', onEsc); }
+  });
+}
+
+/* =======================================================================
+   WIRING
+   ======================================================================= */
+document.addEventListener('click', e => {
+  const t = sel => e.target.closest(sel);
+  let el;
+
+  /* Walking from the finding to the people it is about. */
+  if ((el = t('[data-jump]'))){
+    const j = el.getAttribute('data-jump');
+    S.view = 'all'; save(); render();
+    $('q').value = '';
+    if (j === 'unplaced'){ $('fTier').value = ''; $('fState').value = 'unplaced'; }
+    else if (j === 'noobj'){ $('fTier').value = ''; $('fState').value = 'noobj'; }
+    else if (/^tier[1-4]$/.test(j)){ $('fTier').value = j.slice(4); $('fState').value = ''; }
+    renderAll();
+    window.scrollTo(0,0);
+    return;
+  }
+  if ((el = t('[data-view]'))){
+    S.view = el.getAttribute('data-view');
+    save(); render(); return;
+  }
+  if ((el = t('[data-open]'))){
+    S.lastList = (S.view === 'all') ? 'all' : 'review';
+    S.openId = el.getAttribute('data-open');
+    S.view = 'person';
+    save(); render(); window.scrollTo(0,0); return;
+  }
+  if ((el = t('[data-totodo]')))  { sendToTracker(el.getAttribute('data-totodo')); return; }
+  if ((el = t('[data-log]')))     { openLog(el.getAttribute('data-log')); return; }
+  if ((el = t('[data-note]')))    { openNote(el.getAttribute('data-note')); return; }
+  if ((el = t('[data-edit]')))    { openPersonForm(el.getAttribute('data-edit')); return; }
+  if ((el = t('[data-add]')))     { S.view = 'add'; save(); render();
+                                    setTimeout(() => $('qName').focus(), 30); return; }
+  if ((el = t('[data-demo]')))    { demo(); return; }
+
+  if ((el = t('[data-snooze]'))){
+    /* Pushed off this morning's list without pretending contact happened.
+       The gap keeps growing, because it has. */
+    const p = S.people.find(x => x.id === el.getAttribute('data-snooze'));
+    if (p){
+      p.nextDate = (() => { const d = new Date(); d.setDate(d.getDate()+7);
+        return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
+      p.nextWhat = p.nextWhat || 'Get back to ' + p.name;
+      save(); render();
+      toast('Moved to next week. Still cold, just not this morning.');
+    }
+    return;
+  }
+  if ((el = t('[data-donenext]'))){
+    const p = S.people.find(x => x.id === el.getAttribute('data-donenext'));
+    if (p){ p.nextWhat = ''; p.nextDate = ''; save(); render(); }
+    return;
+  }
+  if ((el = t('[data-delete]'))){
+    const p = S.people.find(x => x.id === el.getAttribute('data-delete'));
+    if (!p) return;
+    /* Two different things, kept apart on purpose. Letting go archives,
+       because a relationship that ended still happened and the record is
+       worth keeping. Delete is for a record that should never have existed,
+       which is nearly always a duplicate. Only this one cannot be undone,
+       so only this one asks. */
+    const n = (p.contacts||[]).length, notes = (p.notes||[]).length;
+    if (!confirm('Delete ' + p.name + ' for good?\n\n' +
+        (n || notes ? 'This also removes ' + n + ' logged contact' + (n === 1 ? '' : 's') +
+          ' and ' + notes + ' note' + (notes === 1 ? '' : 's') + '.\n\n' : '') +
+        'There is no undo. To step away from somebody without losing the record, use Let go instead.')) return;
+    S.people = S.people.filter(x => x.id !== p.id);
+    sitting = sitting.filter(id => id !== p.id);
+    if (S.openId === p.id){ S.openId = null; S.view = S.lastList || 'review'; }
+    save(); render();
+    toast(p.name + ' deleted.');
+    return;
+  }
+  if ((el = t('[data-archive]'))){
+    const p = S.people.find(x => x.id === el.getAttribute('data-archive'));
+    if (!p) return;
+    /* Letting go archives rather than deletes. People do fall out of a
+       network and a tool with no exit accumulates guilt, but a deletion
+       that cannot be undone is the wrong default for a real person. */
+    p.archived = !p.archived;
+    save(); render();
+    toast(p.archived ? p.name + ' archived. Still in the file, out of the review.'
+                     : p.name + ' is back.');
+    return;
+  }
+});
+
+/* The big button goes to the sitting, not to a dialogue. Adding one person
+   and adding forty are the same job here, and the dialogue punished the
+   second. The full form is still there behind Edit on a record. */
+$('bAdd').addEventListener('click', () => { S.view = 'add'; save(); render();
+  setTimeout(() => $('qName').focus(), 30); });
+$('qAdd').addEventListener('click', quickAdd);
+$('qClear').addEventListener('click', () => {
+  pendingExtras = { location:'', met:'', mutuals:'', tags:[] };
+  $('pasteExtras').textContent = '';
+  $('dupWarn').textContent = '';
+  ['qName','qObj','qOrg','qRole','qBday','qLinked','pasteBox'].forEach(id => { $(id).value = ''; });
+  $('qName').focus();
+});
+$('pasteBox').addEventListener('paste', () => setTimeout(applyPaste, 0));
+
+/* The bookmarklet is this file's own grabProfile(), stringified. Keeping one
+   copy means the thing he drags cannot drift from the code he can read above,
+   which is the whole reason it is written as a function rather than a string. */
+(function buildBookmarklet(){
+  const src = grabProfile.toString();
+  /* The whole function becomes one line, so a // comment anywhere inside it
+     would comment out everything after it and the bookmarklet would do
+     nothing at all, silently. grabProfile uses block comments only, and this
+     is the guard that keeps it that way when somebody edits it later. */
+  if (/(^|[^:])\/\//.test(src.replace(/'[^']*'/g,"''"))){
+    $('grabWarn').textContent = 'The bookmarklet was not built: grabProfile() contains a ' +
+      'line comment, and collapsing it to one line would disable everything after it. ' +
+      'Use block comments there.';
+    $('bmLink').remove();
+    return;
+  }
+  const code = 'javascript:(' + src.replace(/\s+/g,' ') + ')();';
+  const a = $('bmLink');
+  a.setAttribute('href', code);
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    toast('Drag it to your bookmarks bar, then click it on someone\'s profile.');
+  });
+  $('grabWarn').textContent =
+    'Written against how LinkedIn lays out a profile today, so it will need a new ' +
+    'version when they rearrange it. The paste box below never breaks, so the worst ' +
+    'case is copying by hand.';
+})();
+['qName','qObj','qOrg','qRole','qLinked'].forEach(id => {
+  $(id).addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); quickAdd(); } });
+});
+['qName','qLinked'].forEach(id => $(id).addEventListener('input', checkDuplicate));
+$('bExport').addEventListener('click', exportJSON);
+$('bCsv').addEventListener('click', exportCSV);
+$('bOpen').addEventListener('click', () => $('file').click());
+$('file').addEventListener('change', importJSON);
+$('bDemo').addEventListener('click', demo);
+$('bWipe').addEventListener('click', () => {
+  if (!confirm('Remove the six invented people? Anything you added yourself stays.')) return;
+  S.people = S.people.filter(p => !p.demo);
+  save(); render();
+  toast('Example cleared.');
+});
+['q','fTier','fState'].forEach(id => {
+  $(id).addEventListener('input', () => { if (S.view === 'all') renderAll(); });
+});
+
+load();
+if (S.view === 'person' && !S.people.some(p => p.id === S.openId)) S.view = 'review';
+$('qTier').innerHTML = tierOptions(2);
+$('qLast').value = todayStr();
+render();
+</script>
+</body>
+</html>
